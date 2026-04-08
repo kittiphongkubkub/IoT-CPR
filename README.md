@@ -1,6 +1,6 @@
 <div align="center">
   
-# 🫀 CPR Training System & Live Monitor
+# <img src="https://cdn.simpleicons.org/fitbit/E53935" width="40" align="top" /> CPR Training System & Live Monitor
 **Advanced IoT Medical Training Platform**
 
 [![ESP32](https://img.shields.io/badge/Hardware-ESP32-blue?style=for-the-badge&logo=espressif)](#)
@@ -25,20 +25,20 @@
 
 ---
 
-## ✨ ไฮไลท์และฟีเจอร์หลัก (Key Features)
+## <img src="https://cdn.simpleicons.org/starship/FBC02D" width="30" align="top" /> ไฮไลท์และฟีเจอร์หลัก (Key Features)
 
 <table>
   <tr>
     <td width="33%" align="center">
-      <h3>📈 Live Monitor</h3>
+      <h3><img src="https://cdn.simpleicons.org/chartdotjs/FF6384" width="24" align="top" /> Live Monitor</h3>
       <p>ตรวจโครงสร้างและกระแสดิบจากเซ็นเซอร์ผ่าน <b>WebSocket (ทุกๆ 100ms)</b> ช่วยให้เห็นกราฟแรงกดและความลึกทันทีที่ลงน้ำหนักมือ พร้อมสถานะแบตเตอรี่แบบสด</p>
     </td>
     <td width="33%" align="center">
-      <h3>🎯 Training Module</h3>
+      <h3><img src="https://cdn.simpleicons.org/target/E53935" width="24" align="top" /> Training Module</h3>
       <p>จำลองสถานการณ์จริง (Gamification) พร้อมการนับจังหวะ (BPM) และคะแนนสม่ำเสมอ ประเมินการคืนรูปของหน้าอกอัตโนมัติ (Chest Recoil)</p>
     </td>
     <td width="33%" align="center">
-      <h3>📊 Analytics Hub</h3>
+      <h3><img src="https://cdn.simpleicons.org/databricks/FF3621" width="24" align="top" /> Analytics Hub</h3>
       <p>หน้าควบคุมสำหรับอาจารย์ผู้สอน สรุปประวัติทั้งหมด วิเคราะห์อัตราการรอดชีวิตผ่าน <b>PostgreSQL</b> และ Chart.js สวยงามเข้าใจง่าย</p>
     </td>
   </tr>
@@ -46,7 +46,7 @@
 
 ---
 
-## 🏗️ สถาปัตยกรรมระบบ (Architecture)
+## <img src="https://cdn.simpleicons.org/nodedotjs/339933" width="30" align="top" /> สถาปัตยกรรมระบบ (Architecture)
 
 > กระบวนการรับส่งข้อมูลถูกออกแบบมาเพื่อ **ลดความหน่วง (Low Latency)** และให้ความสำคัญกับความแม่นยำของเซ็นเซอร์
 
@@ -63,7 +63,7 @@ graph LR
 
 ---
 
-## 🛠️ อุปกรณ์เซ็นเซอร์ (Hardware Components)
+## <img src="https://cdn.simpleicons.org/arduino/00979D" width="30" align="top" /> อุปกรณ์เซ็นเซอร์ (Hardware Components)
 
 | โมดูล | หน้าที่หลัก | การเชื่อมต่อภาพรวม |
 | :--- | :--- | :--- |
@@ -75,11 +75,11 @@ graph LR
 
 ---
 
-## 🚀 เริ่มต้นใช้งานบนเครื่องส่วนตัว (Local Quick Start)
+## <img src="https://cdn.simpleicons.org/spacex/000000" width="30" align="top" /> เริ่มต้นใช้งานบนเครื่องส่วนตัว (Local Quick Start)
 
 ระบบนี้รองรับการรันจำลอง **Simulation Mode** ได้แม้ไม่ได้เสียบฮาร์ดแวร์จริง ทำให้นำโปรเจกต์นี้ไปพรีเซนต์ได้ทุกที่ ทุกเวลา
 
-### 1️⃣ การรันฝั่ง Database & Backend
+### การรันฝั่ง Database & Backend
 1. **ติดตั้งฐานข้อมูล** แนะนำเป็น PostgreSQL จากนั้นตั้งชื่อ Database ว่า `cpr_training` และรันไฟล์ `backend/schema.sql` ให้ตารางเข้าที่
 2. เข้าไปในโฟลเดอร์ Backend จัดเตรียม Dependencies:
    ```bash
@@ -92,7 +92,7 @@ graph LR
    node server.js
    ```
 
-### 2️⃣ การเชื่อมต่อ Hardware & หน้าเว็บ
+### การเชื่อมต่อ Hardware & หน้าเว็บ
 1. อัปโหลดไฟล์โค้ด `firmware/esp32_main/esp32_main.ino` ลงบอร์ด ESP32 ให้เรียบร้อย
 2. ปิดหน้าต่าง Serial Monitor ในโปรแกรม Arduino ทิ้งเสีย! เพื่อป้องกันพอร์ตชน 
 3. พิมพ์ที่อยู่เว็บเบราว์เซอร์ **http://localhost:3000** เริ่มใช้งานได้ทันที
