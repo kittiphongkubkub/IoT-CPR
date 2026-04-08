@@ -1,107 +1,103 @@
-# CPR Training System 🫀
+<div align="center">
+  
+# 🫀 CPR Training System & Live Monitor
+**Advanced IoT Medical Training Platform**
 
-ระบบฝึกปั้มหัวใจ CPR ด้วย IoT แบบครบวงจร แสดงผลแบบ Real-time พร้อมระบบประเมินผลผ่าน Web Dashboard 
+[![ESP32](https://img.shields.io/badge/Hardware-ESP32-blue?style=for-the-badge&logo=espressif)](#)
+[![Node.js](https://img.shields.io/badge/Backend-Node.js-green?style=for-the-badge&logo=node.js)](#)
+[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-336791?style=for-the-badge&logo=postgresql)](#)
+[![WebSockets](https://img.shields.io/badge/API-WebSocket-black?style=for-the-badge)](#)
+[![Web UI](https://img.shields.io/badge/Frontend-HTML/CSS/JS-orange?style=for-the-badge&logo=html5)](#)
+
+ระบบฝึกปั้มหัวใจ CPR สมัยใหม่ที่ผสานเซ็นเซอร์ความละเอียดสูงเข้ากับ Web Dashboard <br> สตรีมข้อมูลสดและประเมินผลเรียลไทม์ (Real-time Feedback)
+  
+</div>
+
+<br>
 
 <p align="center">
-  <!-- นำรูปภาพหน้าจอเว็บมาเซฟทับหรือเปลี่ยนชื่อเป็น live.png, training.png ใส่ไว้ในโฟลเดอร์ assets -->
-  <img src="assets/dashboard.png" width="800" alt="Overview Dashboard">
-  <br>
-  <img src="assets/live.png" width="800" alt="Live Monitor">
+  <!-- นำรูปภาพหน้าจอเว็บมาเซฟทับหรือเปลี่ยนชื่อรูปเป็น dashboard.png ใส่ไว้ในโฟลเดอร์ assets -->
+  <img src="assets/dashboard.png" width="800" alt="Overview Dashboard" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+  <br><br>
+  <!-- นำรูปภาพหน้าจอเว็บตอนดูกราฟมาเซฟทับหรือเปลี่ยนชื่อรูปเป็น live.png ใส่ไว้ในโฟลเดอร์ assets -->
+  <img src="assets/live.png" width="800" alt="Live Monitor" style="border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
 </p>
 
-## 🌟 คุณสมบัติหลัก
+---
 
-### 📈 1. Live Monitor
-- **Real-time Diagnostic:** ตรวจโครงสร้างและกระแสข้อมูลดิบจาก Hardware ทุกๆ 100ms
-- แสดงค่า **แรงกด (kg)**, **ความลึก (cm)**, และความแม่นยำด้าน **ตำแหน่ง (FSR)**
-- ดูกระแสไฟและเปอร์เซ็นต์แบตเตอรี่ (INA226) เพื่อตรวจสอบสถานะอุปกรณ์
-- แสดงกราฟ Real-time ควบคู่กับ Raw JSON Log
+## ✨ ไฮไลท์และฟีเจอร์หลัก (Key Features)
 
-### 🎯 2. Training Dashboard
-- โหมดฝึกซ้อมพร้อมการตั้งเป้าหมาย (Gamification)
-- รองรับการตั้งค่าสถานการณ์ (จมน้ำ/หมดสติ) และระดับความยาก
-- ประเมินคะแนนการทำ CPR ทันทีหลังจบเซสชัน พร้อมคำนวณ:
-  - จังหวะการกด (BPM)
-  - ความสม่ำเสมอ (Consistency)
-  - แรงกด (กำลังดี / มากไป / น้อยไป)
-  - การคืนตัวของหน้าอก (Recoil)
-
-### 📊 3. Analytics & Overview Dashboard
-- หน้าจอสรุปสถิติผู้เข้าทดสอบทั้งหมดแบบตาราง
-- คำนวณเปอร์เซ็นต์ผู้รอดชีวิต (Passed Rate) และผู้เสียชีวิตอัตโนมัติ
-- กราฟแนวโน้มคะแนนการทำ CPR
+<table>
+  <tr>
+    <td width="33%" align="center">
+      <h3>📈 Live Monitor</h3>
+      <p>ตรวจโครงสร้างและกระแสดิบจากเซ็นเซอร์ผ่าน <b>WebSocket (ทุกๆ 100ms)</b> ช่วยให้เห็นกราฟแรงกดและความลึกทันทีที่ลงน้ำหนักมือ พร้อมสถานะแบตเตอรี่แบบสด</p>
+    </td>
+    <td width="33%" align="center">
+      <h3>🎯 Training Module</h3>
+      <p>จำลองสถานการณ์จริง (Gamification) พร้อมการนับจังหวะ (BPM) และคะแนนสม่ำเสมอ ประเมินการคืนรูปของหน้าอกอัตโนมัติ (Chest Recoil)</p>
+    </td>
+    <td width="33%" align="center">
+      <h3>📊 Analytics Hub</h3>
+      <p>หน้าควบคุมสำหรับอาจารย์ผู้สอน สรุปประวัติทั้งหมด วิเคราะห์อัตราการรอดชีวิตผ่าน <b>PostgreSQL</b> และ Chart.js สวยงามเข้าใจง่าย</p>
+    </td>
+  </tr>
+</table>
 
 ---
 
-## 📂 โครงสร้างโปรเจกต์ (Project Structure)
+## 🏗️ สถาปัตยกรรมระบบ (Architecture)
 
-โปรเจกต์นี้แบ่งแกนการทำงานเป็น 3 ส่วนหลัก (Architecture):
+> กระบวนการรับส่งข้อมูลถูกออกแบบมาเพื่อ **ลดความหน่วง (Low Latency)** และให้ความสำคัญกับความแม่นยำของเซ็นเซอร์
 
-```text
-IoT-CPR/
-├── firmware/       # Code สำหรับเซ็นเซอร์และ ESP32
-│   └── esp32_main/ # (C++) โค้ดหลักในการอ่านค่า ถ่วงน้ำหนัก และแปลงส่งออกเปน JSON
-├── backend/        # ระบบเซิร์ฟเวอร์
-│   ├── server.js   # (Node.js) ดึงข้อมูลจาก Serial Port และยิงขึ้นวง WebSocket
-│   └── schema.sql  # โครงสร้างฐานข้อมูล PostgreSQL
-└── frontend/       # หน้าเว็บสำหรับผู้ใช้งาน (UI/UX)
-    ├── index.html  # หน้า Analytics และประวัติย้อนหลัง
-    ├── live.html   # หน้า Live Monitor สังเกตเซ็นเซอร์
-    ├── training.*  # หน้าระบบสอบและจำลอง CPR
-    └── style.css   # ระบบ Design System (Glassmorphism / Modern UI)
+```mermaid
+graph LR
+    A[ESP32 & Sensors] -- USB Serial 115200 --> B(Node.js Backend)
+    B -- SQL Queries --> C[(PostgreSQL)]
+    B -- ws:// Real-time --> D{Web Dashboard}
 ```
 
----
-
-## 🛠️ เทคโนโลยีที่ใช้งาน (Tech Stack)
-
-### 📡 อุปกรณ์ Hardware
-- **ไมโครคอนโทรลเลอร์:** ESP32 (รันผ่าน Arduino Framework)
-- **วัดแรงกด:** HX711 Load Cell Amplifier
-- **วัดความลึกและรอบ:** MPU-6050 (Accelerometer / Gyroscope)
-- **วัดตำแหน่งมือ:** FSR 402 (Force Sensitive Resistor)
-- **วัดพลังงาน:** INA226 (วัดกระแส/แรงดันแบตเตอรี่)
-- **การนำเสนอ:** จอ OLED สีเดียว, LED ส่องสถานะ
-
-### 💻 Software & Backend
-- **Server Environment:** Node.js (Express)
-- **Communication:** SerialPort สำหรับรับข้อมูล ESP32 และ `ws` (WebSocket) เพื่อส่งให้เว็บทันที
-- **Database:** PostgreSQL (บันทึกข้อมูลประวัติการสอบ)
-- **Frontend App:** Vanilla HTML/CSS/JS รูปแบบ Single-Page Application (SPA)
-- **กราฟและการพลอต:** Chart.js
+* **Firmware (`/firmware`):** C++ วนลูปอ่านค่า HX711 (น้ำหนัก kg), MPU6050 (ความลึก Accelerometer) และ FSR ถอดรหัสส่งออกเป็น JSON
+* **Backend (`/backend`):** Express.js ควบคุม SerialPort และทำหน้าที่ป้อนข้อมูลลงพอร์ต WebSocket
+* **Frontend (`/frontend`):** ระบบ UI/UX ดีไซน์สวยงาม (Modern & Glassmorphism) ไม่ต้องพึ่งพา Framework หนักๆ 
 
 ---
 
-## 🚀 วิธีการติดตั้งและการรันระบบ (Getting Started)
+## 🛠️ อุปกรณ์เซ็นเซอร์ (Hardware Components)
 
-การรันระบบนี้จำเป็นต้องดำเนินการเป็น 3 ขั้นตอน (Database -> Backend -> Hardware)
+| โมดูล | หน้าที่หลัก | การเชื่อมต่อภาพรวม |
+| :--- | :--- | :--- |
+| **ESP32** | ไมโครคอนโทรลเลอร์สั่งการและประมวลผลสัญญาณหลัก | `Serial`, `I2C`, `A0` |
+| **HX711 + Load Cell** | วัดแรงกดที่หน้าอก (แปลงค่าเป็น **กิโลกรัม kg**) | `DOUT`, `SCK` |
+| **MPU-6050** | ตรวจความขยับขึ้นลง (Z-axis) เพื่อแปลค่าเป็น **ความลึก cm** | `I2C (SDA/SCL)` |
+| **FSR 402** | Force Sensitive Resistor ตรวจจับตำแหน่งวางหน้ามือ | `Analog` |
+| **INA226** | วัดโวลต์เตจและกระแสไฟของแบตเตอรี่ | `I2C (SDA/SCL)` |
 
-### 1. การเตรียม Database (PostgreSQL)
-1. ติดตั้ง PostgreSQL ในเครื่อง
-2. เปิด pgAdmin (หรือ Command Line) สร้างฐานข้อมูลชื่อ `cpr_training`
-3. รันโค้ด SQL จากไฟล์ `backend/schema.sql` เพื่อสร้างตาราง
+---
 
-### 2. การเตรียมเซิร์ฟเวอร์ Backend
-1. เข้าไปที่โฟลเดอร์รันคำสั่ง `cd backend`
-2. สร้างไฟล์ `.env` พร้อมใส่ค่าพอร์ตเซนเซอร์และรหัสผ่าน DB (ดูรูปแบบจากโค้ด)
-3. รันคำสั่งนี้เพื่อดาวน์โหลดไลบรารี:
+## 🚀 เริ่มต้นใช้งานบนเครื่องส่วนตัว (Local Quick Start)
+
+ระบบนี้รองรับการรันจำลอง **Simulation Mode** ได้แม้ไม่ได้เสียบฮาร์ดแวร์จริง ทำให้นำโปรเจกต์นี้ไปพรีเซนต์ได้ทุกที่ ทุกเวลา
+
+### 1️⃣ การรันฝั่ง Database & Backend
+1. **ติดตั้งฐานข้อมูล** แนะนำเป็น PostgreSQL จากนั้นตั้งชื่อ Database ว่า `cpr_training` และรันไฟล์ `backend/schema.sql` ให้ตารางเข้าที่
+2. เข้าไปในโฟลเดอร์ Backend จัดเตรียม Dependencies:
    ```bash
+   cd backend
    npm install
    ```
-4. เปิดเซิร์ฟเวอร์:
+3. ตั้งค่าไฟล์ `.env` ใส่รหัสผ่าน DB และพอร์ต Serial
+4. กดเปิดเซิร์ฟเวอร์
    ```bash
    node server.js
    ```
 
-### 3. การใช้งาน Hardware & หน้าเว็บ
-1. เปิดโปรแกรม **Arduino IDE** นำไฟล์ `firmware/esp32_main/esp32_main.ino` ไปอัปโหลดลงบอร์ด ESP32
-2. อย่าลืม **ปิดหน้าหน้าต่าง Serial Monitor** บนหน้าจอ Arduino เสียก่อนที่เซิร์ฟเวอร์จะเชื่อมต่อฮาร์ดแวร์ได้
-3. หน้าเว็บเบราว์เซอร์ เข้าถึงได้ผ่านการพิมพ์ URL: **http://localhost:3000** 
+### 2️⃣ การเชื่อมต่อ Hardware & หน้าเว็บ
+1. อัปโหลดไฟล์โค้ด `firmware/esp32_main/esp32_main.ino` ลงบอร์ด ESP32 ให้เรียบร้อย
+2. ปิดหน้าต่าง Serial Monitor ในโปรแกรม Arduino ทิ้งเสีย! เพื่อป้องกันพอร์ตชน 
+3. พิมพ์ที่อยู่เว็บเบราว์เซอร์ **http://localhost:3000** เริ่มใช้งานได้ทันที
 
 ---
 
-## 👨‍💻 ผู้พัฒนา
-
-Developed for an Advanced IoT integration project integrating precision measurements and complex algorithmic medical guidelines into an accessible modern platform. 
-
-© 2026 CPR Training System. All rights reserved.
+**© 2026 Advanced IoT CPR Training System.** <br>
+*Developed by Kittiphong and Team. Designed for Medical Educational Purposes.*
