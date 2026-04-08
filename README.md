@@ -2,6 +2,13 @@
 
 ระบบฝึกปั้มหัวใจ CPR ด้วย IoT แบบครบวงจร แสดงผลแบบ Real-time พร้อมระบบประเมินผลผ่าน Web Dashboard 
 
+<p align="center">
+  <!-- นำรูปภาพหน้าจอเว็บมาเซฟทับหรือเปลี่ยนชื่อเป็น live.png, training.png ใส่ไว้ในโฟลเดอร์ assets -->
+  <img src="assets/dashboard.png" width="800" alt="Overview Dashboard">
+  <br>
+  <img src="assets/live.png" width="800" alt="Live Monitor">
+</p>
+
 ## 🌟 คุณสมบัติหลัก
 
 ### 📈 1. Live Monitor
