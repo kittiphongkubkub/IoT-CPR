@@ -1,136 +1,100 @@
 # CPR Training System 🫀
 
-ระบบฝึกปั้มหัวใจ CPR ด้วย IoT และการแสดงผลแบบ Real-time
+ระบบฝึกปั้มหัวใจ CPR ด้วย IoT แบบครบวงจร แสดงผลแบบ Real-time พร้อมระบบประเมินผลผ่าน Web Dashboard 
 
-## คุณสมบัติหลัก
+## 🌟 คุณสมบัติหลัก
 
-### 📊 Dashboard
-- แสดงสถิติการทดสอบทั้งหมด
-- กราฟแนวโน้มคะแนนการทดสอบ
-- สถิติผู้รอดและไม่รอด
-- ระบบกรองและค้นหาข้อมูล
-- ส่งออกข้อมูลเป็น CSV
+### 📈 1. Live Monitor
+- **Real-time Diagnostic:** ตรวจโครงสร้างและกระแสข้อมูลดิบจาก Hardware ทุกๆ 100ms
+- แสดงค่า **แรงกด (kg)**, **ความลึก (cm)**, และความแม่นยำด้าน **ตำแหน่ง (FSR)**
+- ดูกระแสไฟและเปอร์เซ็นต์แบตเตอรี่ (INA226) เพื่อตรวจสอบสถานะอุปกรณ์
+- แสดงกราฟ Real-time ควบคู่กับ Raw JSON Log
 
-### 🎯 ระบบการทดสอบ
-- เลือกสถานการณ์: จมน้ำ, หมดสติ
-- เลือกเวลาฝึก: 2 นาที หรือ 4 นาที
-- คำแนะนำการประเมินสถานการณ์
-- วิดีโอสาธิตสถานการณ์
+### 🎯 2. Training Dashboard
+- โหมดฝึกซ้อมพร้อมการตั้งเป้าหมาย (Gamification)
+- รองรับการตั้งค่าสถานการณ์ (จมน้ำ/หมดสติ) และระดับความยาก
+- ประเมินคะแนนการทำ CPR ทันทีหลังจบเซสชัน พร้อมคำนวณ:
+  - จังหวะการกด (BPM)
+  - ความสม่ำเสมอ (Consistency)
+  - แรงกด (กำลังดี / มากไป / น้อยไป)
+  - การคืนตัวของหน้าอก (Recoil)
 
-### 💪 การฝึก CPR Real-time
-- ตรวจวัดแรงกด (N)
-- วัดจังหวะการกด (BPM)
-- วัดความลึกการกด (cm)
-- แสดงผลแบบ Real-time
-- ระบบ Metronome ช่วยจังหวะ
-- Keyboard shortcuts สำหรับการทดสอบ
+### 📊 3. Analytics & Overview Dashboard
+- หน้าจอสรุปสถิติผู้เข้าทดสอบทั้งหมดแบบตาราง
+- คำนวณเปอร์เซ็นต์ผู้รอดชีวิต (Passed Rate) และผู้เสียชีวิตอัตโนมัติ
+- กราฟแนวโน้มคะแนนการทำ CPR
 
-### 📈 การประเมินผล
-- คำนวณคะแนนอัตโนมัติ
-- ประเมินความสม่ำเสมอ
-- แสดงสถิติรายละเอียด
-- บันทึกผลการทดสอบ
+---
 
-## โครงสร้างไฟล์
+## 📂 โครงสร้างโปรเจกต์ (Project Structure)
 
-```
-dashboard-IOT/
-├── index.html          # หน้า Dashboard หลัก
-├── scenario.html       # หน้าแสดงสถานการณ์และคำแนะนำ
-├── training.html       # หน้าฝึก CPR
-├── script.js          # JavaScript สำหรับ Dashboard
-├── training.js        # JavaScript สำหรับการฝึก
-├── style.css          # Stylesheet หลัก
-└── assets/            # รูปภาพและวิดีโอ
-    ├── drowning.mp4   # วิดีโอสถานการณ์จมน้ำ
-    └── unconscious.mp4 # วิดีโอสถานการณ์หมดสติ
+โปรเจกต์นี้แบ่งแกนการทำงานเป็น 3 ส่วนหลัก (Architecture):
+
+```text
+IoT-CPR/
+├── firmware/       # Code สำหรับเซ็นเซอร์และ ESP32
+│   └── esp32_main/ # (C++) โค้ดหลักในการอ่านค่า ถ่วงน้ำหนัก และแปลงส่งออกเปน JSON
+├── backend/        # ระบบเซิร์ฟเวอร์
+│   ├── server.js   # (Node.js) ดึงข้อมูลจาก Serial Port และยิงขึ้นวง WebSocket
+│   └── schema.sql  # โครงสร้างฐานข้อมูล PostgreSQL
+└── frontend/       # หน้าเว็บสำหรับผู้ใช้งาน (UI/UX)
+    ├── index.html  # หน้า Analytics และประวัติย้อนหลัง
+    ├── live.html   # หน้า Live Monitor สังเกตเซ็นเซอร์
+    ├── training.*  # หน้าระบบสอบและจำลอง CPR
+    └── style.css   # ระบบ Design System (Glassmorphism / Modern UI)
 ```
 
-## วิธีการใช้งาน
+---
 
-1. เปิดไฟล์ `index.html` ในเบราว์เซอร์
-2. คลิก "เริ่มการทดสอบใหม่"
-3. กรอกข้อมูล:
-   - ชื่อ-นามสกุลผู้ทดสอบ
-   - เลือกสถานการณ์
-   - เลือกเวลาฝึก (2 นาที หรือ 4 นาที)
-4. ชมคำแนะนำและวิดีโอสถานการณ์
-5. เริ่มฝึก CPR พร้อมการตรวจวัดแบบ Real-time
-6. ดูผลการประเมินและสถิติ
+## 🛠️ เทคโนโลยีที่ใช้งาน (Tech Stack)
 
-## เทคโนโลยีที่ใช้
+### 📡 อุปกรณ์ Hardware
+- **ไมโครคอนโทรลเลอร์:** ESP32 (รันผ่าน Arduino Framework)
+- **วัดแรงกด:** HX711 Load Cell Amplifier
+- **วัดความลึกและรอบ:** MPU-6050 (Accelerometer / Gyroscope)
+- **วัดตำแหน่งมือ:** FSR 402 (Force Sensitive Resistor)
+- **วัดพลังงาน:** INA226 (วัดกระแส/แรงดันแบตเตอรี่)
+- **การนำเสนอ:** จอ OLED สีเดียว, LED ส่องสถานะ
 
-- **HTML5** - โครงสร้างหน้าเว็บ
-- **CSS3** - การออกแบบและ Animation
-- **JavaScript** - Logic และ Interactivity
-- **Chart.js** - กราฟและการแสดงผลสถิติ
-- **WebSocket** - การเชื่อมต่อแบบ Real-time กับ ESP32
-- **ESP32 + Arduino** - Hardware สำหรับรับข้อมูลจริง
+### 💻 Software & Backend
+- **Server Environment:** Node.js (Express)
+- **Communication:** SerialPort สำหรับรับข้อมูล ESP32 และ `ws` (WebSocket) เพื่อส่งให้เว็บทันที
+- **Database:** PostgreSQL (บันทึกข้อมูลประวัติการสอบ)
+- **Frontend App:** Vanilla HTML/CSS/JS รูปแบบ Single-Page Application (SPA)
+- **กราฟและการพลอต:** Chart.js
 
-## 🔌 การเชื่อมต่อ ESP32
+---
 
-ระบบรองรับการเชื่อมต่อ ESP32 แบบ Real-time ผ่าน WebSocket แล้ว!
+## 🚀 วิธีการติดตั้งและการรันระบบ (Getting Started)
 
-### วิธีเริ่มต้นแบบรวดเร็ว
+การรันระบบนี้จำเป็นต้องดำเนินการเป็น 3 ขั้นตอน (Database -> Backend -> Hardware)
 
-1. **Upload โค้ดลง ESP32**: ดูคู่มือที่ [QUICKSTART.md](QUICKSTART.md)
-2. **ตั้งค่า WiFi** ใน `esp32_websocket.ino`
-3. **แก้ไข IP** ใน `training.js`
-4. **รันเว็บบน Local Server**: `python -m http.server 8000`
-5. **เริ่มทดสอบ!** 🎉
+### 1. การเตรียม Database (PostgreSQL)
+1. ติดตั้ง PostgreSQL ในเครื่อง
+2. เปิด pgAdmin (หรือ Command Line) สร้างฐานข้อมูลชื่อ `cpr_training`
+3. รันโค้ด SQL จากไฟล์ `backend/schema.sql` เพื่อสร้างตาราง
 
-### คู่มือครบถ้วน
-- 📖 [Quick Start Guide](QUICKSTART.md) - เริ่มต้นใช้งานภายใน 5 นาที
-- 📚 [ESP32 Setup Guide](ESP32_SETUP.md) - คู่มือติดตั้งแบบละเอียด
+### 2. การเตรียมเซิร์ฟเวอร์ Backend
+1. เข้าไปที่โฟลเดอร์รันคำสั่ง `cd backend`
+2. สร้างไฟล์ `.env` พร้อมใส่ค่าพอร์ตเซนเซอร์และรหัสผ่าน DB (ดูรูปแบบจากโค้ด)
+3. รันคำสั่งนี้เพื่อดาวน์โหลดไลบรารี:
+   ```bash
+   npm install
+   ```
+4. เปิดเซิร์ฟเวอร์:
+   ```bash
+   node server.js
+   ```
 
-## การพัฒนาในอนาคต
+### 3. การใช้งาน Hardware & หน้าเว็บ
+1. เปิดโปรแกรม **Arduino IDE** นำไฟล์ `firmware/esp32_main/esp32_main.ino` ไปอัปโหลดลงบอร์ด ESP32
+2. อย่าลืม **ปิดหน้าหน้าต่าง Serial Monitor** บนหน้าจอ Arduino เสียก่อนที่เซิร์ฟเวอร์จะเชื่อมต่อฮาร์ดแวร์ได้
+3. หน้าเว็บเบราว์เซอร์ เข้าถึงได้ผ่านการพิมพ์ URL: **http://localhost:3000** 
 
-### 🎮 ระบบระดับความยาก (Beginner/Advanced Mode)
-- **Beginner Mode**: โหมดสำหรับผู้เริ่มต้น
-  - เวลาฝึก 2 นาที
-  - คำแนะนำเพิ่มเติมระหว่างฝึก
-  - เกณฑ์การผ่านที่ผ่อนปรน
-  - แสดงคำใบ้และคำแนะนำแบบ Real-time
-  
-- **Advanced Mode**: โหมดสำหรับผู้มีประสบการณ์
-  - เวลาฝึก 4 นาที
-  - เกณฑ์การประเมินที่เข้มงวดขึ้น
-  - สถานการณ์ที่ซับซ้อนมากขึ้น
-  - การวัดผลที่ละเอียดขึ้น
+---
 
-### 🔌 การเชื่อมต่อ Hardware
-- เชื่อมต่อกับ ESP32 ผ่าน WebSocket
-- รับข้อมูลจาก Load Cell แบบ Real-time
-- รับข้อมูลจาก Pressure Sensor
-- Feedback แบบ Real-time จาก Hardware
+## 👨‍💻 ผู้พัฒนา
 
-### 📱 Responsive Design
-- รองรับการแสดงผลบนมือถือ
-- Tablet-friendly interface
-- Touch-optimized controls
-
-### 🌐 Backend Integration
-- บันทึกข้อมูลลงฐานข้อมูล
-- API สำหรับดึงข้อมูลสถิติ
-- ระบบ Authentication
-- Multi-user support
-
-### 📊 Analytics และ Reporting
-- รายงานสถิติแบบละเอียด
-- Export รายงานเป็น PDF
-- เปรียบเทียบผลการทดสอบ
-- แนวโน้มการพัฒนาของผู้ทดสอบ
-
-### 🎓 Learning Management
-- ระบบจัดการหลักสูตร
-- ติดตามความก้าวหน้า
-- ใบประกาศนียบัตร
-- วิดีโอสอนเพิ่มเติม
-
-## ผู้พัฒนา
-
-Developed with ❤️ for better CPR training
-
-## ลิขสิทธิ์
+Developed for an Advanced IoT integration project integrating precision measurements and complex algorithmic medical guidelines into an accessible modern platform. 
 
 © 2026 CPR Training System. All rights reserved.
