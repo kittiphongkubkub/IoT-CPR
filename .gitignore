@@ -1,0 +1,17 @@
+# Node.js
+backend/node_modules/
+backend/.env
+frontend/node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Arduino/ESP32 compiled files (if any inside folders)
+*.elf
+*.bin
+*.hex
+build/

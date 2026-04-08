@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Monitor — CPR Training System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #db2777;
+            --primary-dark: #be185d;
+            --primary-light: #ec4899;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg: #f5f1e8;
+            --bg-card: rgba(255, 250, 245, 0.90);
+            --text: #3f3a36;
+            --text-muted: #78716c;
+            --border: rgba(219, 39, 119, 0.2);
+            --shadow: 0 4px 20px rgba(219, 39, 119, 0.12);
+            --glow: 0 0 24px rgba(219, 39, 119, 0.35);
+            --radius: 1.25rem;
+        }
+
+        body {
+            font-family: 'Noto Sans Thai', sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(circle at 15% 50%, rgba(219, 39, 119, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 85% 20%, rgba(236, 72, 153, 0.10) 0%, transparent 45%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        header {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #f9a8d4, #ec4899);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: var(--glow);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.06)
+            }
+        }
+
+        .header-title h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        .header-title p {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* Connection badge */
+        #connBadge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1.25rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.4s ease;
+        }
+
+        #connBadge.disconnected {
+            background: rgba(239, 68, 68, 0.12);
+            color: #dc2626;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+        }
+
+        #connBadge.connecting {
+            background: rgba(245, 158, 11, 0.12);
+            color: #b45309;
+            border: 1.5px solid rgba(245, 158, 11, 0.3);
+        }
+
+        #connBadge.connected {
+            background: rgba(16, 185, 129, 0.12);
+            color: #059669;
+            border: 1.5px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .dot.blink {
+            animation: blink 1s ease-in-out infinite;
+        }
+
+        @keyframes blink {
+
+            0%,
+            100% {
+                opacity: 1
+            }
+
+            50% {
+                opacity: 0.2
+            }
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn-nav {
+            padding: 0.5rem 1rem;
+            border-radius: 0.6rem;
+            border: 1.5px solid var(--border);
+            background: var(--bg-card);
+            color: var(--text);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+
+        .btn-nav:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* ===== LAYOUT ===== */
+        main {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        /* ===== STATUS BAR ===== */
+        #statusBar {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        #statusMsg {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            flex: 1;
+        }
+
+        #lastUpdate {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        /* ===== SENSOR GRID ===== */
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .sensor-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border);
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+            animation: fadeUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        .sensor-card:nth-child(1) {
+            animation-delay: 0.05s
+        }
+
+        .sensor-card:nth-child(2) {
+            animation-delay: 0.10s
+        }
+
+        .sensor-card:nth-child(3) {
+            animation-delay: 0.15s
+        }
+
+        .sensor-card:nth-child(4) {
+            animation-delay: 0.20s
+        }
+
+        .sensor-card:nth-child(5) {
+            animation-delay: 0.25s
+        }
+
+        .sensor-card:nth-child(6) {
+            animation-delay: 0.30s
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        .sensor-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow);
+        }
+
+        .sensor-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #f9a8d4, #ec4899);
+        }
+
+        .sensor-card.good::before {
+            background: linear-gradient(90deg, #6ee7b7, #10b981);
+        }
+
+        .sensor-card.warn::before {
+            background: linear-gradient(90deg, #fcd34d, #f59e0b);
+        }
+
+        .sensor-card.bad::before {
+            background: linear-gradient(90deg, #fca5a5, #ef4444);
+        }
+
+        .sensor-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sensor-value {
+            font-size: 2.4rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--primary);
+            transition: color 0.3s;
+        }
+
+        .sensor-value.good {
+            color: var(--success);
+        }
+
+        .sensor-value.warn {
+            color: var(--warning);
+        }
+
+        .sensor-value.bad {
+            color: var(--danger);
+        }
+
+        .sensor-unit {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .sensor-icon {
+            position: absolute;
+            right: 1rem;
+            top: 1.1rem;
+            font-size: 2rem;
+            opacity: 0.12;
+        }
+
+        /* ===== POSITION INDICATOR (FSR) ===== */
+        .position-card {
+            grid-column: span 1;
+        }
+
+        .pos-indicator {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            margin: 0.25rem 0;
+            transition: all 0.4s ease;
+        }
+
+        .pos-ok {
+            background: rgba(16, 185, 129, 0.15);
+            border: 2px solid var(--success);
+        }
+
+        .pos-bad {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid var(--danger);
+        }
+
+        /* ===== BALANCE BAR ===== */
+        .balance-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            padding-top: 0.25rem;
+        }
+
+        .balance-track {
+            height: 14px;
+            border-radius: 99px;
+            background: linear-gradient(90deg, #fca5a5, #f5f1e8 50%, #6ee7b7);
+            position: relative;
+            border: 1px solid var(--border);
+        }
+
+        .balance-needle {
+            position: absolute;
+            top: 50%;
+            width: 4px;
+            height: 22px;
+            background: var(--primary);
+            border-radius: 2px;
+            transform: translate(-50%, -50%);
+            transition: left 0.3s ease;
+            box-shadow: 0 0 6px rgba(219, 39, 119, 0.5);
+        }
+
+        .balance-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .balance-value-text {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--primary);
+        }
+
+        /* ===== QUALITY BADGE ===== */
+        .quality-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 9999px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+
+        .q-good {
+            background: rgba(16, 185, 129, 0.15);
+            color: #059669;
+            border: 1.5px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .q-warn {
+            background: rgba(245, 158, 11, 0.15);
+            color: #b45309;
+            border: 1.5px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .q-bad {
+            background: rgba(239, 68, 68, 0.15);
+            color: #dc2626;
+            border: 1.5px solid rgba(239, 68, 68, 0.3);
+        }
+
+        /* ===== CHARTS SECTION ===== */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .chart-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(10px);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 1.25rem;
+        }
+
+        .chart-card h2 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .chart-card p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+        }
+
+        .chart-wrap {
+            position: relative;
+            height: 280px;
+        }
+
+        /* ===== RAW LOG ===== */
+        #rawLog {
+            background: #1e1b1d;
+            border-radius: var(--radius);
+            border: 1px solid rgba(219, 39, 119, 0.25);
+            padding: 1.25rem;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 0.82rem;
+            color: #f9a8d4;
+            height: 220px;
+            overflow-y: auto;
+            line-height: 1.6;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .log-entry {
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+            padding: 0.35rem 0;
+            word-break: break-all;
+        }
+
+        .log-time {
+            color: #a8a29e;
+            margin-right: 0.5rem;
+            font-weight: bold;
+        }
+
+        /* ===== SIMULATION NOTICE ===== */
+        #simNotice {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1.5px dashed rgba(245, 158, 11, 0.4);
+            border-radius: var(--radius);
+            padding: 0.75rem 1.25rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.88rem;
+            color: #b45309;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media(max-width:600px) {
+            .sensor-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .sensor-value {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div class="header-left">
+            <div class="logo-icon">🫀</div>
+            <div class="header-title">
+                <h1>Live Monitor</h1>
+                <p>CPR Training System — Real-time ESP32</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <div id="connBadge" class="disconnected">
+                <span class="dot blink"></span>
+                <span id="connText">กำลังเชื่อมต่อ...</span>
+            </div>
+            <button class="btn-nav" onclick="location.href='index.html'">📊 Dashboard</button>
+        </div>
+    </header>
+
+    <!-- ===== MAIN ===== -->
+    <main>
+
+        <!-- Status bar -->
+        <div id="statusBar">
+            <span>📡</span>
+            <span id="statusMsg">กำลังเชื่อมต่อ WebSocket ที่ <code>ws://localhost:3000</code>...</span>
+            <span id="lastUpdate"></span>
+        </div>
+
+        <!-- Simulation notice (hidden by default) -->
+        <div id="simNotice" style="display:none">
+            ⚠️ <strong>Simulation Mode</strong> — ไม่พบ ESP32 → แสดงข้อมูลจำลอง เพื่อทดสอบ UI
+        </div>
+
+        <!-- SENSOR CARDS -->
+        <div class="sensor-grid">
+
+            <!-- Position (FSR) -->
+            <div class="sensor-card position-card" id="cardPos">
+                <span class="sensor-icon">🖐</span>
+                <div class="sensor-label">ตำแหน่งมือ (FSR)</div>
+                <div class="pos-indicator pos-bad" id="posIndicator">❌</div>
+                <div class="sensor-unit" id="posText">วางผิดตำแหน่ง</div>
+                <div class="sensor-unit" id="fsrRaw" style="font-size:0.72rem;opacity:0.6"></div>
+            </div>
+
+            <!-- Force -->
+            <div class="sensor-card" id="cardForce">
+                <span class="sensor-icon">💪</span>
+                <div class="sensor-label">แรงกด</div>
+                <div class="sensor-value" id="valForce">—</div>
+                <div class="sensor-unit">กิโลกรัม (kg)</div>
+                <div style="margin-top:0.35rem">
+                    <div style="height:6px;border-radius:99px;background:rgba(219,39,119,0.1);overflow:hidden">
+                        <div id="forceBar"
+                            style="height:100%;width:0%;background:linear-gradient(90deg,#f9a8d4,#ec4899);border-radius:99px;transition:width 0.3s">
+                        </div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;font-size:0.68rem;color:var(--text-muted);margin-top:2px">
+                        <span>0</span><span style="color:var(--success)">10–20 kg ✓</span><span>30+</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Depth / AccZ -->
+            <div class="sensor-card" id="cardDepth">
+                <span class="sensor-icon">📏</span>
+                <div class="sensor-label">ความลึก / AccZ</div>
+                <div class="sensor-value" id="valDepth">—</div>
+                <div class="sensor-unit" id="depthUnit">cm</div>
+            </div>
+
+            <!-- BPM -->
+            <div class="sensor-card" id="cardBpm">
+                <span class="sensor-icon">❤️</span>
+                <div class="sensor-label">จังหวะ</div>
+                <div class="sensor-value" id="valBpm">—</div>
+                <div class="sensor-unit">ครั้ง/นาที</div>
+            </div>
+
+            <!-- Balance -->
+            <div class="sensor-card" style="grid-column: span 2" id="cardBalance">
+                <span class="sensor-icon">⚖️</span>
+                <div class="sensor-label">Balance ซ้าย / ขวา</div>
+                <div class="balance-wrap">
+                    <div class="balance-value-text" id="valBalance">—</div>
+                    <div class="balance-track">
+                        <div class="balance-needle" id="balanceNeedle" style="left:50%"></div>
+                    </div>
+                    <div class="balance-labels"><span>⬅ เอียงซ้าย</span><span>ตรงกลาง ✓</span><span>เอียงขวา ➡</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality -->
+            <div class="sensor-card" id="cardQuality">
+                <span class="sensor-icon">🏅</span>
+                <div class="sensor-label">คุณภาพ</div>
+                <div style="margin-top:0.25rem" id="qualityWrap">
+                    <span class="quality-badge q-warn" id="qualityBadge">⏳ รอข้อมูล</span>
+                </div>
+            </div>
+
+            <!-- Recoil -->
+            <div class="sensor-card" id="cardRecoil">
+                <span class="sensor-icon">🔄</span>
+                <div class="sensor-label">Recoil (คืนตัว)</div>
+                <div style="margin-top:0.25rem">
+                    <span class="quality-badge q-warn" id="recoilBadge">⏳ รอข้อมูล</span>
+                </div>
+            </div>
+
+            <!-- Battery -->
+            <div class="sensor-card" id="cardBatt">
+                <span class="sensor-icon">🔋</span>
+                <div class="sensor-label">แบตเตอรี่ (INA226)</div>
+                <div class="sensor-value" id="valBattPct">—</div>
+                <div class="sensor-unit"><span id="valBattV">—</span> V</div>
+                <div style="margin-top:0.4rem">
+                    <div style="height:6px;border-radius:99px;background:rgba(16,185,129,0.15);overflow:hidden">
+                        <div id="battBar" style="height:100%;width:0%;background:linear-gradient(90deg,#6ee7b7,#10b981);border-radius:99px;transition:width 0.5s"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CHARTS -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h2>📈 แรงกด + AccZ (Real-time)</h2>
+                <p>ข้อมูล 60 จุดล่าสุด</p>
+                <div class="chart-wrap"><canvas id="lineChart"></canvas></div>
+            </div>
+            <div class="chart-card">
+                <h2>📊 Raw Log</h2>
+                <p>JSON จาก ESP32 ดิบๆ</p>
+                <div id="rawLog"></div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ==================== CONFIG ====================
+        const WS_URL = 'ws://localhost:3000';
+        const MAX_POINTS = 60;
+        const FSR_THRESHOLD = 300;
+
+        // ==================== STATE ====================
+        let ws = null;
+        let reconnectTimer = null;
+        let connected = false;
+        let simInterval = null;
+        let dataMode = 'unknown'; // 'full' | 'raw'
+
+        // ==================== CHART ====================
+        const lineChart = new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: Array(MAX_POINTS).fill(''),
+                datasets: [
+                    {
+                        label: 'แรงกด (kg)',
+                        data: Array(MAX_POINTS).fill(null),
+                        borderColor: '#ec4899',
+                        backgroundColor: 'rgba(236,72,153,0.08)',
+                        borderWidth: 2.5, tension: 0.4, fill: true,
+                        pointRadius: 0, yAxisID: 'y'
+                    },
+                    {
+                        label: 'AccZ ×100',
+                        data: Array(MAX_POINTS).fill(null),
+                        borderColor: '#06b6d4',
+                        backgroundColor: 'rgba(6,182,212,0.05)',
+                        borderWidth: 1.5, tension: 0.3, fill: false,
+                        pointRadius: 0, yAxisID: 'y2',
+                        borderDash: [4, 2]
+                    }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                animation: { duration: 0 },
+                plugins: {
+                    legend: { labels: { color: '#3f3a36', font: { family: 'Noto Sans Thai', size: 12 } } }
+                },
+                scales: {
+                    x: { display: false },
+                    y: {
+                        type: 'linear', position: 'left',
+                        min: 0, max: 30,
+                        ticks: { color: '#ec4899', font: { size: 11 } },
+                        grid: { color: 'rgba(219,39,119,0.06)' }
+                    },
+                    y2: {
+                        type: 'linear', position: 'right',
+                        ticks: { color: '#06b6d4', font: { size: 11 } },
+                        grid: { drawOnChartArea: false }
+                    }
+                }
+            }
+        });
+
+        // ==================== WebSocket ====================
+        function connect() {
+            setStatus('connecting');
+            ws = new WebSocket(WS_URL);
+
+            ws.onopen = () => {
+                setStatus('connected');
+                stopSim();
+            };
+
+            ws.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    handleData(data);
+                } catch { /* ignore */ }
+            };
+
+            ws.onclose = () => {
+                setStatus('disconnected');
+                scheduleReconnect();
+            };
+
+            ws.onerror = () => {
+                ws.close();
+            };
+        }
+
+        function scheduleReconnect() {
+            if (reconnectTimer) return;
+            reconnectTimer = setTimeout(() => {
+                reconnectTimer = null;
+                connect();
+            }, 3000);
+            startSim(); // แสดง simulation ขณะรอ
+        }
+
+        // ==================== DATA HANDLER ====================
+        function handleData(data) {
+            // server 'status' message
+            if (data.type === 'status') {
+                const mode = data.mode || '';
+                document.getElementById('statusMsg').textContent =
+                    mode === 'serial' ? `✅ ESP32 เชื่อมต่อผ่าน Serial (${data.port || ''})` :
+                        mode === 'simulation' ? '⚠️ Server mode: simulation (ไม่พบ ESP32)' :
+                            'WebSocket เชื่อมต่อสำเร็จ';
+                if (mode === 'simulation') {
+                    document.getElementById('simNotice').style.display = 'flex';
+                    startSim();
+                } else if (mode === 'serial') {
+                    stopSim();
+                }
+                return;
+            }
+
+            // Full data from esp32_serial.ino (legacy): {type:"data", force, depth, bpm, balance, position_ok, quality}
+            if (data.type === 'data') {
+                dataMode = 'full';
+                stopSim();
+                updateLiveCards(data.force, data.fsr, null, null);
+                updateFull(data);
+                pushChart(data.force, null);
+                logRaw(data);
+                return;
+            }
+
+            // NEW: live update (ทุก 100ms จาก esp32_main.ino)
+            if (data.type === 'live') {
+                dataMode = 'full';
+                stopSim();
+                updateLiveCards(data.force, data.fsr, data.batt_v, data.batt_pct);
+                pushChart(data.force, null);
+                logRaw(data);
+                updateTime();
+                return;
+            }
+
+            // NEW: compression event (กดเสร็จ 1 ครั้ง จาก esp32_main.ino)
+            if (data.type === 'compression') {
+                dataMode = 'full';
+                stopSim();
+                flashCompression(data);
+                pushChart(data.force, null);
+                logRaw(data);
+                return;
+            }
+
+            // Raw data from esp32_mpu_test.ino: {fsr, az}
+            if ('fsr' in data || 'az' in data) {
+                dataMode = 'raw';
+                stopSim();
+                updateRaw(data);
+                pushChart(null, data.az);
+                logRaw(data);
+                return;
+            }
+        }
+
+        // ==================== UI: LIVE CARDS (ทุก 100ms) ====================
+        function updateLiveCards(force, fsr, batt_v, batt_pct) {
+            // Force live
+            const f = force || 0;
+            const fCls = f >= 10 && f <= 20 ? 'good' : f > 0 && f < 10 ? 'warn' : f > 20 ? 'bad' : '';
+            setGauge('valForce', f.toFixed(1), 'forceBar', f, 0, 30, fCls);
+
+            // FSR → position
+            if (fsr !== undefined && fsr !== null) {
+                setPosition(fsr > 50, fsr);
+            }
+
+            // Battery
+            if (batt_v !== null && batt_v !== undefined) {
+                document.getElementById('valBattV').textContent = batt_v.toFixed(2);
+                document.getElementById('valBattPct').textContent = batt_pct?.toFixed(0) + '%';
+                document.getElementById('battBar').style.width = Math.min(100, batt_pct || 0) + '%';
+                const battCl = (batt_pct || 0) > 50 ? 'good' : (batt_pct || 0) > 20 ? 'warn' : 'bad';
+                setValue('valBattPct', (batt_pct?.toFixed(0) || '—') + '%', battCl);
+            }
+        }
+
+        // ==================== UI: COMPRESSION EVENT FLASH ====================
+        function flashCompression(d) {
+            // อัปเดต quality จากการกดล่าสุด
+            setQuality(d.quality || '');
+
+            // Recoil badge
+            const rb = document.getElementById('recoilBadge');
+            if (d.recoil) {
+                rb.className = 'quality-badge q-good'; rb.textContent = '✅ คืนตัวดี';
+            } else {
+                rb.className = 'quality-badge q-bad'; rb.textContent = '❌ คืนตัวไม่ครบ';
+            }
+
+            // Depth
+            const depth = d.depth || 0;
+            setValue('valDepth', depth.toFixed(1), depth >= 5 && depth <= 6 ? 'good' : depth < 5 ? 'warn' : 'bad');
+            document.getElementById('depthUnit').textContent = 'cm';
+
+            // BPM
+            const bpm = d.bpm || 0;
+            setValue('valBpm', bpm.toFixed(0), bpm >= 100 && bpm <= 120 ? 'good' : bpm > 0 ? 'warn' : '');
+
+            updateTime();
+        }
+
+        // ==================== UI: FULL DATA (legacy) ====================
+        function updateFull(d) {
+            // Position
+            setPosition(d.position_ok, null);
+
+            // Force (kg range 10–20)
+            const f = d.force || 0;
+            const fCls = f >= 10 && f <= 20 ? 'good' : f > 0 && f < 10 ? 'warn' : f > 20 ? 'bad' : '';
+            setGauge('valForce', f.toFixed(1), 'forceBar', f, 0, 30, fCls);
+
+            // Depth
+            const depth = d.depth || 0;
+            setValue('valDepth', depth.toFixed(1), depth >= 5 && depth <= 6 ? 'good' : depth < 5 ? 'warn' : 'bad');
+            document.getElementById('depthUnit').textContent = 'cm';
+
+            // BPM
+            const bpm = d.bpm || 0;
+            setValue('valBpm', bpm, bpm >= 100 && bpm <= 120 ? 'good' : bpm > 0 ? 'warn' : '');
+
+            // Balance
+            setBalance(d.balance || 0);
+
+            // Quality
+            setQuality(d.quality || '');
+
+            updateTime();
+        }
+
+        // ==================== UI: RAW DATA (esp32_mpu_test) ====================
+        function updateRaw(d) {
+            // FSR → position
+            const fsr = d.fsr || 0;
+            setPosition(fsr >= FSR_THRESHOLD, fsr);
+
+            // AccZ (az = accZ × 100)
+            const az = d.az !== undefined ? d.az : null;
+            if (az !== null) {
+                setValue('valDepth', (az / 100).toFixed(3), '');
+                document.getElementById('depthUnit').textContent = 'AccZ (g)';
+            }
+
+            // ซ่อน field ที่ไม่มีข้อมูล
+            document.getElementById('valForce').textContent = '—';
+            document.getElementById('valBpm').textContent = '—';
+            document.getElementById('valBalance').textContent = '—';
+
+            updateTime();
+        }
+
+        // ==================== UI HELPERS ====================
+        function setPosition(ok, fsrRaw) {
+            const ind = document.getElementById('posIndicator');
+            const txt = document.getElementById('posText');
+            const raw = document.getElementById('fsrRaw');
+            if (ok) {
+                ind.className = 'pos-indicator pos-ok';
+                ind.textContent = '✅';
+                txt.textContent = 'วางถูกตำแหน่ง';
+            } else {
+                ind.className = 'pos-indicator pos-bad';
+                ind.textContent = '❌';
+                txt.textContent = 'วางผิดตำแหน่ง';
+            }
+            if (fsrRaw !== null) raw.textContent = `FSR raw: ${fsrRaw}`;
+        }
+
+        function setValue(id, val, cls) {
+            const el = document.getElementById(id);
+            el.textContent = val;
+            el.className = 'sensor-value' + (cls ? ' ' + cls : '');
+        }
+
+        function setGauge(valId, valText, barId, val, min, max, cls) {
+            setValue(valId, valText, cls);
+            const pct = Math.min(100, Math.max(0, (val - min) / (max - min) * 100));
+            document.getElementById(barId).style.width = pct + '%';
+        }
+
+        function setBalance(pct) {
+            // pct: -100 (full left) to +100 (full right)
+            document.getElementById('valBalance').textContent =
+                pct > 1 ? `เอียงซ้าย ${pct.toFixed(1)}%` :
+                    pct < -1 ? `เอียงขวา ${Math.abs(pct).toFixed(1)}%` : 'ตรงกลาง ✓';
+
+            // needle: 0% left → 100% right, 50% = center
+            const pos = 50 + (pct / 100) * 50;   // pct +100 → right 100%, -100 → left 0%
+            document.getElementById('balanceNeedle').style.left = pos + '%';
+
+            const card = document.getElementById('cardBalance');
+            card.className = 'sensor-card' + (Math.abs(pct) < 15 ? ' good' : Math.abs(pct) < 30 ? ' warn' : ' bad');
+        }
+
+        const QUALITY_MAP = {
+            // New firmware (esp32_main) — uppercase strings
+            'GOOD':       { cls: 'q-good', icon: '✅', label: 'กดดี' },
+            'TOO LIGHT':  { cls: 'q-warn', icon: '⬇️', label: 'กดเบาเกิน' },
+            'TOO HARD':   { cls: 'q-bad',  icon: '⬆️', label: 'กดแรงเกิน' },
+            'TOO SLOW':   { cls: 'q-warn', icon: '🐢', label: 'ช้าเกิน' },
+            'TOO FAST':   { cls: 'q-warn', icon: '🐇', label: 'เร็วเกิน' },
+            'IDLE':       { cls: 'q-warn', icon: '💤', label: 'รอการกด' },
+            'GOOD RATE':  { cls: 'q-good', icon: '✅', label: 'จังหวะดี' },
+            // Legacy firmware (esp32_serial) — lowercase
+            'good':          { cls: 'q-good', icon: '✅', label: 'กดดีมาก' },
+            'too_light':     { cls: 'q-warn', icon: '⬇️', label: 'กดเบาเกิน' },
+            'too_hard':      { cls: 'q-bad',  icon: '⬆️', label: 'กดแรงเกิน' },
+            'too_slow':      { cls: 'q-warn', icon: '🐢', label: 'ช้าเกิน' },
+            'too_fast':      { cls: 'q-warn', icon: '🐇', label: 'เร็วเกิน' },
+            'off_center':    { cls: 'q-bad',  icon: '↔️', label: 'ตำแหน่งเอียง' },
+            'wrong_position':{ cls: 'q-bad',  icon: '🖐', label: 'วางมือผิด' },
+        };
+
+        function setQuality(q) {
+            const map = QUALITY_MAP[q] || { cls: 'q-warn', icon: '⏳', label: q || 'รอข้อมูล' };
+            const badge = document.getElementById('qualityBadge');
+            badge.className = 'quality-badge ' + map.cls;
+            badge.textContent = map.icon + ' ' + map.label;
+        }
+
+        // ==================== CHART PUSH ====================
+        function pushChart(force, az) {
+            const now = new Date().toLocaleTimeString('th-TH', { hour12: false });
+            const d = lineChart.data;
+            d.labels.push(now); d.labels.shift();
+            d.datasets[0].data.push(force); d.datasets[0].data.shift();
+            d.datasets[1].data.push(az); d.datasets[1].data.shift();
+            lineChart.update('none');
+        }
+
+        // ==================== RAW LOG ====================
+        function logRaw(data) {
+            const log = document.getElementById('rawLog');
+            const time = new Date().toLocaleTimeString('th-TH', { hour12: false });
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span>${JSON.stringify(data)}`;
+            log.prepend(entry);
+            // keep max 100 entries
+            while (log.children.length > 100) log.removeChild(log.lastChild);
+        }
+
+        // ==================== CONNECTION STATUS ====================
+        function setStatus(state) {
+            connected = state === 'connected';
+            const badge = document.getElementById('connBadge');
+            const text = document.getElementById('connText');
+            const dot = badge.querySelector('.dot');
+            badge.className = state;
+            dot.className = 'dot' + (state !== 'connected' ? ' blink' : '');
+            text.textContent = state === 'connected' ? 'เชื่อมต่อแล้ว' :
+                state === 'connecting' ? 'กำลังเชื่อมต่อ...' : 'ขาดการเชื่อมต่อ';
+
+            document.getElementById('statusMsg').textContent =
+                state === 'connected' ? '✅ WebSocket เชื่อมต่อสำเร็จ — รอข้อมูลจาก ESP32' :
+                    state === 'connecting' ? `🔄 กำลังเชื่อมต่อ WebSocket ที่ ${WS_URL}...` :
+                        '❌ ขาดการเชื่อมต่อ — กำลัง reconnect ใน 3 วินาที';
+        }
+
+        function updateTime() {
+            document.getElementById('lastUpdate').textContent =
+                '🕐 อัปเดต: ' + new Date().toLocaleTimeString('th-TH', { hour12: false });
+        }
+
+        // ==================== SIMULATION MODE ====================
+        // แสดงข้อมูลจำลองขณะยังไม่มี ESP32 เพื่อทดสอบ UI
+        function startSim() {
+            if (simInterval) return;
+            document.getElementById('simNotice').style.display = 'flex';
+            let t = 0;
+            simInterval = setInterval(() => {
+                t++;
+                // Simulate force in kg (10–20 kg good range)
+                const force = 14 + Math.sin(t * 0.2) * 4 + (Math.random() - 0.5) * 2;
+                const depth = 5 + Math.sin(t * 0.2) * 0.8;
+                const bpm = 108 + Math.round((Math.random() - 0.5) * 6);
+                const fsr = 200 + Math.round(Math.random() * 150);
+                const batt_v = 7.6 + Math.random() * 0.5;
+                const batt_pct = ((batt_v - 6.6) / (8.4 - 6.6)) * 100;
+                const quality = force < 10 ? 'TOO LIGHT' : force > 20 ? 'TOO HARD' : 'GOOD';
+
+                // Send as 'live' type (every 100ms)
+                updateLiveCards(force, fsr, batt_v, batt_pct);
+                pushChart(force, null);
+                logRaw({ type: 'live', force: +force.toFixed(1), fsr, batt_v: +batt_v.toFixed(2), batt_pct: +batt_pct.toFixed(0), _sim: true });
+
+                // Simulate compression event every ~10 ticks
+                if (t % 10 === 0) {
+                    const compData = { type:'compression', id: Math.floor(t/10), force: +force.toFixed(1),
+                        depth: +depth.toFixed(1), bpm, recoil: true, fsr, quality };
+                    flashCompression(compData);
+                    logRaw({ ...compData, _sim: true });
+                }
+            }, 100);
+        }
+
+        function stopSim() {
+            if (!simInterval) return;
+            clearInterval(simInterval);
+            simInterval = null;
+            document.getElementById('simNotice').style.display = 'none';
+        }
+
+        // ==================== INIT ====================
+        connect();
+    </script>
+</body>
+
+</html>

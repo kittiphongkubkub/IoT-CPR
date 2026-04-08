@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPR Training System</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+                            <path d="M20 5 L20 15 M20 25 L20 35 M5 20 L15 20 M25 20 L35 20" stroke="white"
+                                stroke-width="3" stroke-linecap="round" />
+                            <circle cx="20" cy="20" r="15" stroke="white" stroke-width="2.5" fill="none" />
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <h1>CPR Training System</h1>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-secondary" onclick="location.href='live.html'"
+                        style="background:linear-gradient(135deg,rgba(219,39,119,0.1),rgba(236,72,153,0.05));border-color:rgba(219,39,119,0.3);">
+                        📡 Live Monitor
+                    </button>
+                    <button class="btn-secondary" onclick="refreshData()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path
+                                d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+                        </svg>
+                        รีเฟรช
+                    </button>
+                    <button class="btn-primary" onclick="showNewTestModal()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M12 5v14M5 12h14" />
+                        </svg>
+                        เริ่มการทดสอบใหม่
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container">
+
+            <!-- Statistics Cards -->
+            <section class="stats-section">
+                <div class="stat-card stat-primary">
+                    <div class="stat-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">จำนวนผู้ทดสอบทั้งหมด</div>
+                        <div class="stat-value" id="totalTests">0</div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-success">
+                    <div class="stat-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">ผลการทดสอบผ่าน (รอด)</div>
+                        <div class="stat-value" id="passCount">0</div>
+                        <div class="stat-sublabel">อัตราการผ่าน: <span id="passRate">0%</span></div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-danger">
+                    <div class="stat-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">ผลการทดสอบไม่ผ่าน (ไม่รอด)</div>
+                        <div class="stat-value" id="failCount">0</div>
+                        <div class="stat-sublabel">อัตราไม่ผ่าน: <span id="failRate">0%</span></div>
+                    </div>
+                </div>
+
+                <div class="stat-card stat-info">
+                    <div class="stat-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <div class="stat-label">คะแนนเฉลี่ยทั้งหมด</div>
+                        <div class="stat-value" id="avgScore">0</div>
+                        <div class="stat-sublabel">คะแนนเต็ม 100</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Charts Section -->
+            <section class="charts-section">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h2>แนวโน้มคะแนนการทดสอบ</h2>
+                        <p>แสดงคะแนนของผู้ทดสอบแต่ละคน</p>
+                    </div>
+                    <canvas id="scoreChart"></canvas>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h2>สถิติผลการทดสอบ</h2>
+                        <p>สัดส่วนผู้รอดและไม่รอด</p>
+                    </div>
+                    <canvas id="passFailChart"></canvas>
+                </div>
+            </section>
+
+            <!-- Filters -->
+            <section class="filters-section">
+                <div class="filter-group">
+                    <label for="statusFilter">กรองตามสถานะ:</label>
+                    <select id="statusFilter" onchange="filterData()">
+                        <option value="all">ทั้งหมด</option>
+                        <option value="รอด">รอด</option>
+                        <option value="ไม่รอด">ไม่รอด</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="searchInput">ค้นหาชื่อ:</label>
+                    <input type="text" id="searchInput" placeholder="พิมพ์ชื่อผู้ทดสอบ..." oninput="filterData()">
+                </div>
+
+                <div class="filter-group">
+                    <label for="sortBy">เรียงตาม:</label>
+                    <select id="sortBy" onchange="sortData()">
+                        <option value="date-desc">วันที่ (ล่าสุด)</option>
+                        <option value="date-asc">วันที่ (เก่าสุด)</option>
+                        <option value="score-desc">คะแนน (สูง-ต่ำ)</option>
+                        <option value="score-asc">คะแนน (ต่ำ-สูง)</option>
+                        <option value="name-asc">ชื่อ (ก-ฮ)</option>
+                    </select>
+                </div>
+            </section>
+
+            <!-- Data Table -->
+            <section class="table-section">
+                <div class="table-header">
+                    <h2>ข้อมูลการทดสอบทั้งหมด</h2>
+                    <button class="btn-export" onclick="exportData()">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                        ส่งออกข้อมูล (CSV)
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="dataTable">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>วันที่-เวลา</th>
+                                <th>ชื่อผู้ทดสอบ</th>
+                                <th>เวลาที่ใช้ฝึก</th>
+                                <th>เฉลี่ยแรงกด (N)</th>
+                                <th>จังหวะ (ครั้ง/นาที)</th>
+                                <th>คะแนน</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 ระบบฝึก CPR ด้วย IoT | Developed with ❤️ for better CPR training</p>
+        </div>
+    </footer>
+
+    <!-- New Test Modal -->
+    <div id="newTestModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>CPR Training Manikin</h2>
+                <button class="close-btn" onclick="closeNewTestModal()">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="newTestForm" onsubmit="handleNewTest(event)">
+                    <!-- ชื่อ-นามสกุล -->
+                    <div class="form-group">
+                        <input type="text" id="studentName" class="form-input" placeholder="ชื่อ-นามสกุล" required>
+                    </div>
+
+                    <!-- เลือกสถานการณ์ -->
+                    <div class="form-group">
+                        <div class="dropdown-wrapper">
+                            <select id="patientCondition" class="form-select" required>
+                                <option value="">เลือกสถานการณ์</option>
+                                <option value="จมน้ำ">จมน้ำ</option>
+                                <option value="หมดสติ">หมดสติ</option>
+                            </select>
+                            <div class="click-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                    </path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- เลือกระดับ -->
+                    <div class="form-group">
+                        <div class="dropdown-wrapper">
+                            <select id="difficultyLevel" class="form-select" required>
+                                <option value="">เลือกระดับ (คลิกเพื่อเลือก)</option>
+                                <option value="beginner">2 นาที</option>
+                                <option value="advanced">4 นาที</option>
+                            </select>
+                            <div class="click-icon">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                    <path
+                                        d="M9 11H3v2h6v-2zm0-4H3v2h6V7zm0 8H3v2h6v-2zm8-8v12c0 .55-.45 1-1 1h-4c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h4c.55 0 1 .45 1 1zm8-2h-6v2h6V5zm0 4h-6v2h6V9zm0 4h-6v2h6v-2z" />
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ปุ่มยืนยัน -->
+                    <button type="submit" class="btn-confirm">
+                        <span>ยืนยัน</span>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                            <path d="M5 12h14M12 5l7 7-7 7" />
+                        </svg>
+                        <div class="next-page-label">ไปหน้าต่อไป</div>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

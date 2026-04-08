@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CPR Training - ระบบฝึก CPR</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .training-container {
+            max-width: 1000px;
+            width: 95%;
+            background: var(--bg-card);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-xl);
+            margin: 2rem auto;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(219, 39, 119, 0.3);
+        }
+
+        .training-header {
+            text-align: center;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .training-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .session-info {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-bottom: var(--spacing-lg);
+        }
+
+        .info-badge {
+            background: rgba(219, 39, 119, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(219, 39, 119, 0.3);
+        }
+
+        .timer-display {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background: linear-gradient(135deg, rgba(219, 39, 119, 0.1), rgba(236, 72, 153, 0.05));
+            border-radius: var(--radius-lg);
+            border: 2px solid rgba(219, 39, 119, 0.3);
+        }
+
+        .timer-label {
+            font-size: 1rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timer-value {
+            font-size: 4rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .timer-target {
+            font-size: 0.9rem;
+            color: var(--text-tertiary);
+            margin-top: 0.5rem;
+        }
+
+        .cpr-animation {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 2rem 0;
+            min-height: 250px;
+            position: relative;
+        }
+
+        .heart-icon {
+            font-size: 10rem;
+            transition: transform 0.15s ease-in-out;
+            will-change: transform;
+        }
+
+        .heart-icon.compress {
+            transform: scale(0.85);
+        }
+
+        .compression-wave {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 3px solid var(--accent-pink);
+            border-radius: 50%;
+            opacity: 0;
+            animation: wave-pulse 1s ease-out;
+        }
+
+        @keyframes wave-pulse {
+            0% {
+                transform: scale(0.5);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(219, 39, 119, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(219, 39, 119, 0.2);
+        }
+
+        .metric-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .metric-icon {
+            font-size: 1.5rem;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-status {
+            font-size: 0.85rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .status-good {
+            background: rgba(34, 197, 94, 0.2);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-warning {
+            background: rgba(234, 179, 8, 0.2);
+            color: #eab308;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        .status-danger {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-primary);
+            border-radius: 999px;
+            transition: width 0.3s ease;
+            will-change: width;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: none;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 4px 15px rgba(219, 39, 119, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(219, 39, 119, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+            border: 1px solid rgba(219, 39, 119, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .summary-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .summary-modal.active {
+            display: flex;
+        }
+
+        .summary-content {
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--radius-lg);
+            max-width: 600px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(219, 39, 119, 0.3);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .summary-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .summary-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .performance-rating {
+            text-align: center;
+            font-size: 4rem;
+            margin: 1rem 0;
+        }
+
+        .summary-stats {
+            display: grid;
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .summary-stat {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(219, 39, 119, 0.2);
+        }
+
+        .keyboard-hint {
+            text-align: center;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(219, 39, 119, 0.2);
+        }
+
+        .keyboard-hint p {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin: 0.25rem 0;
+        }
+
+        .keyboard-hint strong {
+            color: var(--accent-pink);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="training-container">
+        <div class="training-header">
+            <h1>🫀 การฝึกปั้มหัวใจ CPR</h1>
+            <div class="session-info">
+                <div class="info-badge">
+                    👤 นักเรียน: <strong id="studentName">-</strong>
+                </div>
+                <div class="info-badge">
+                    📋 สถานการณ์: <strong id="scenarioType">-</strong>
+                </div>
+                <div class="info-badge">
+                    🎯 ระดับ: <strong id="difficultyLevel">-</strong>
+                </div>
+                <div class="info-badge" id="esp32StatusBadge">
+                    <span id="esp32StatusIcon">🔴</span> ESP32: <strong id="esp32StatusText">Disconnected</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timer Display -->
+        <div class="timer-display">
+            <div class="timer-label">⏱️ เวลาที่ผ่านไป</div>
+            <div class="timer-value" id="timerDisplay">00:00</div>
+            <div class="timer-target">เป้าหมาย: อย่างน้อย 02:00 นาที</div>
+        </div>
+
+        <!-- CPR Animation -->
+        <div class="cpr-animation">
+            <div class="heart-icon" id="heartIcon">💗</div>
+        </div>
+
+        <!-- Metrics Grid -->
+        <div class="metrics-grid">
+            <!-- Compression Counter -->
+            <div class="metric-card">
+                <div class="metric-label">
+                    <span class="metric-icon">📊</span>
+                    <span>จำนวนการกด</span>
+                </div>
+                <div class="metric-value" id="compressionCount">0</div>
+                <div id="compressionStatus" class="metric-status status-good">เริ่มต้น</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="compressionProgress" style="width: 0%"></div>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-tertiary); margin-top: 0.5rem;">
+                    <span id="currentSet">0</span> / 30 (รอบที่ <span id="cycleNumber">1</span>)
+                </div>
+            </div>
+
+            <!-- BPM Rhythm -->
+            <div class="metric-card">
+                <div class="metric-label">
+                    <span class="metric-icon">🎵</span>
+                    <span>จังหวะการกด</span>
+                </div>
+                <div class="metric-value" id="bpmValue">0</div>
+                <div id="bpmStatus" class="metric-status status-good">รอการกด</div>
+                <div style="font-size: 0.85rem; color: var(--text-tertiary); margin-top: 0.5rem;">
+                    เป้าหมาย: 100-120 BPM
+                </div>
+            </div>
+
+            <!-- Depth Indicator -->
+            <div class="metric-card">
+                <div class="metric-label">
+                    <span class="metric-icon">📏</span>
+                    <span>ความลึกการกด</span>
+                </div>
+                <div class="metric-value" id="depthValue">0.0 cm</div>
+                <div id="depthStatus" class="metric-status status-good">รอการกด</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="depthProgress" style="width: 0%"></div>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-tertiary); margin-top: 0.5rem;">
+                    เป้าหมาย: 5-6 cm
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <button class="btn btn-secondary" id="pauseBtn" onclick="togglePause()">
+                <span id="pauseIcon">⏸️</span>
+                <span id="pauseText">หยุดชั่วคราว</span>
+            </button>
+            <button class="btn btn-secondary" id="soundBtn" onclick="toggleSound()">
+                <span id="soundIcon">🔇</span>
+                <span>เสียง Metronome</span>
+            </button>
+            <button class="btn btn-primary" onclick="finishTraining()">
+                <span>✅</span>
+                <span>เสร็จสิ้นการฝึก</span>
+            </button>
+        </div>
+
+        <!-- Keyboard Hint -->
+        <div class="keyboard-hint">
+            <p><strong>⌨️ ทดสอบด้วยคีย์บอร์ด:</strong></p>
+            <p><strong>SPACE</strong> = กดปั้มหัวใจ | <strong>P</strong> = หยุด/เล่นต่อ | <strong>F</strong> = เสร็จสิ้น
+            </p>
+        </div>
+    </div>
+
+    <!-- Summary Modal -->
+    <div class="summary-modal" id="summaryModal">
+        <div class="summary-content">
+            <div class="summary-header">
+                <h2>📊 สรุปผลการฝึก CPR</h2>
+                <div class="performance-rating" id="performanceRating">⭐⭐⭐⭐⭐</div>
+                <p id="performanceText" style="color: var(--text-secondary);">ผลการปฏิบัติ: ดีมาก</p>
+            </div>
+
+            <div class="summary-stats">
+                <div class="summary-stat">
+                    <span>⏱️ เวลารวม:</span>
+                    <strong id="summaryTime">-</strong>
+                </div>
+                <div class="summary-stat">
+                    <span>📊 จำนวนการกดรวม:</span>
+                    <strong id="summaryCompressions">-</strong>
+                </div>
+                <div class="summary-stat">
+                    <span>🎵 BPM เฉลี่ย:</span>
+                    <strong id="summaryBPM">-</strong>
+                </div>
+                <div class="summary-stat">
+                    <span>📏 ความลึกเฉลี่ย:</span>
+                    <strong id="summaryDepth">-</strong>
+                </div>
+                <div class="summary-stat">
+                    <span>✅ คะแนนความสม่ำเสมอ:</span>
+                    <strong id="summaryConsistency">-</strong>
+                </div>
+            </div>
+
+            <!-- สถานะการบันทึก -->
+            <div id="saveStatus" style="text-align:center; margin: 0.75rem 0; font-size:0.95rem; color:var(--text-secondary);">
+                💾 กำลังบันทึกผล...
+            </div>
+
+            <div class="controls">
+                <button class="btn btn-secondary" onclick="closeSummary()">
+                    ดูข้อมูลเพิ่มเติม
+                </button>
+                <button class="btn btn-primary" onclick="backToDashboard()">
+                    กลับหน้าหลัก
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="training.js"></script>
+</body>
+
+</html>
